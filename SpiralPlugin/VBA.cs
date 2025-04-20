@@ -1,30 +1,5 @@
 ﻿using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Interop;
+using System.IO;
 
-namespace SpiralPlugin
-{
-    public class VBA
-    {
-        public static void RunVBA()
-        {
-            var ed = Application.DocumentManager.MdiActiveDocument.Editor;
-            try
-            {
-                var comObj = Application.AcadApplication;
-                if (comObj == null)
-                {
-                    ed.WriteMessage("\nVBA failed: AutoCAD COM interface is null.");
-                    return;
-                }
-                var acadApp = (AcadApplication)comObj;
-                acadApp.LoadDVB(@"C:\AutoCADPlugins\Spiral_v4.01f.dvb");
-                acadApp.RunMacro("Module1.CreateSpiralStaircase");
-                ed.WriteMessage("\nVBA executed successfully.");
-            }
-            catch (System.Exception ex)
-            {
-                ed.WriteMessage($"\nVBA failed: {ex.Message}");
-            }
-        }
-    }
-}
+namespace SpiralPlugin { public class VBA { public static void RunVBA() { var ed = Application.DocumentManager.MdiActiveDocument.Editor; try { var dvbPath = @"C:\\AutoCADPlugins\\Spiral_v4.01f.dvb"; if (!File.Exists(dvbPath)) { ed.WriteMessage($"\\nVBA failed: DVB file not found at {dvbPath}."); return; } ed.WriteMessage("\\nDVB file found at: " + dvbPath); var comObj = Application.AcadApplication; if (comObj == null) { ed.WriteMessage("\\nVBA failed: AutoCAD COM interface is null."); return; } ed.WriteMessage("\\nCOM object type: " + comObj.GetType().ToString()); AcadApplication acadApp; try { acadApp = (AcadApplication)comObj; ed.WriteMessage("\\nCOM cast to AcadApplication succeeded."); } catch (System.Exception ex) { ed.WriteMessage($"\\nVBA failed: COM cast to AcadApplication failed: {ex.Message}"); return; } try { acadApp.LoadDVB(dvbPath); ed.WriteMessage("\\nDVB file loaded successfully."); } catch (System.Exception ex) { ed.WriteMessage($"\\nVBA failed: LoadDVB failed: {ex.Message}"); return; } acadApp.RunMacro("Module1.CreateSpiralStaircase"); ed.WriteMessage("\\nVBA executed successfully."); } catch (System.Exception ex) { ed.WriteMessage($"\\nVBA failed: {ex.Message}"); } } } }
